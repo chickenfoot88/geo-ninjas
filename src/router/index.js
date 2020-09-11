@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Gmap from '../components/home/Gmap.vue'
+import Signup from '../components/auth/Signup.vue'
 
 Vue.use(VueRouter)
 
@@ -10,6 +11,11 @@ const routes = [
     name: 'Gmap',
     component: Gmap
   },
+  {
+    path: '/signup',
+    name: 'Signup',
+    component: Signup
+  }
 
 ]
 
