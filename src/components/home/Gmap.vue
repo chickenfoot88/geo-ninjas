@@ -9,11 +9,11 @@ export default {
   data() {
     return {
       lat: 53,
-      lng: -2
+      lng: -2,
     }
   },
-  mounted() {
-    this.renderMap()
+  async mounted() {
+    this.getUserGeolocation()
   },
   methods: {
     renderMap() {
@@ -24,10 +24,29 @@ export default {
         zoom: 6,
         maxZoom: 15,
         minZoom: 3,
-        streetViewControl: false
+        streetViewControl: false,
       })
-    }
-  }
+    },
+    getUserGeolocation() {
+      if (!navigator.geolocation) {
+        this.renderMap()
+        return
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        ({ coords }) => {
+          this.lat = coords.latitude
+          this.lng = coords.longitude
+          this.renderMap()
+        },
+        (error) => {
+          console.error(error)
+          this.renderMap()
+        },
+        { maximumAge: 60000, timeout: 3000 }
+      )
+    },
+  },
 }
 </script>
 <style>
