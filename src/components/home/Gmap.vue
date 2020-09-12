@@ -4,6 +4,10 @@
   </div>
 </template>
 <script>
+import firebase from 'firebase/app'
+import 'firebase/auth'
+import db from '@/firebase/init'
+
 export default {
   name: 'Gmap',
   data() {
@@ -27,17 +31,37 @@ export default {
         streetViewControl: false,
       })
     },
-    getUserGeolocation() {
+
+    async getUserGeolocation() {
       if (!navigator.geolocation) {
         this.renderMap()
         return
       }
 
       navigator.geolocation.getCurrentPosition(
-        ({ coords }) => {
+        async ({ coords }) => {
           this.lat = coords.latitude
           this.lng = coords.longitude
-          this.renderMap()
+
+          const currentAuthUser = await this.getUserData()
+          const currentUserRef = db.collection('users')
+
+          currentUserRef.where('user_id', '==', currentAuthUser.uid).get()
+            .then((users) => {
+              users.forEach(async (user) => {
+                db.collection('users')
+                  .doc(user.id)
+                  .update({
+                    geolocation: {
+                      lat: this.lat,
+                      lng: this.lng,
+                    },
+                  })
+              })
+            })
+            .then(() => {
+              this.renderMap()
+            })
         },
         (error) => {
           console.error(error)
@@ -45,6 +69,11 @@ export default {
         },
         { maximumAge: 60000, timeout: 3000 }
       )
+    },
+
+    async getUserData() {
+      const user = await firebase.auth().currentUser
+      return user
     },
   },
 }
