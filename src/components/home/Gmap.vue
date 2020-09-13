@@ -20,7 +20,7 @@ export default {
     this.getUserGeolocation()
   },
   methods: {
-    renderMap() {
+    async renderMap() {
       const mapEl = this.$refs.map
       // eslint-disable-next-line no-undef, no-unused-vars
       const map = new google.maps.Map(mapEl, {
@@ -29,6 +29,14 @@ export default {
         maxZoom: 15,
         minZoom: 3,
         streetViewControl: false,
+      })
+
+      const users = await this.getUsersData()
+      users.forEach(user => {
+        const geolocation = user.data().geolocation
+        if (geolocation) {
+          this.createMarker(geolocation, map)
+        }
       })
     },
 
@@ -43,7 +51,7 @@ export default {
           this.lat = coords.latitude
           this.lng = coords.longitude
 
-          const currentAuthUser = await this.getUserData()
+          const currentAuthUser = await this.getCurrentUserData()
           const currentUserRef = db.collection('users')
 
           currentUserRef.where('user_id', '==', currentAuthUser.uid).get()
@@ -71,10 +79,27 @@ export default {
       )
     },
 
-    async getUserData() {
+    async getCurrentUserData() {
       const user = await firebase.auth().currentUser
       return user
     },
+
+    async getUsersData() {
+      const users = await db.collection('users').get()
+      return users
+    },
+
+    async createMarker(geolocation, map) {
+      // eslint-disable-next-line no-undef
+      const marker = new google.maps.Marker({
+        position: geolocation,
+        map
+      })
+
+      marker.addListener('click', () => {
+        console.log(geolocation);
+      })
+    }
   },
 }
 </script>
