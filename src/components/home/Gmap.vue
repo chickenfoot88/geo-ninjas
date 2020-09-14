@@ -35,7 +35,7 @@ export default {
       users.forEach(user => {
         const geolocation = user.data().geolocation
         if (geolocation) {
-          this.createMarker(geolocation, map)
+          this.createMarker(geolocation, map, user.id)
         }
       })
     },
@@ -89,7 +89,7 @@ export default {
       return users
     },
 
-    async createMarker(geolocation, map) {
+    async createMarker(geolocation, map, userId) {
       // eslint-disable-next-line no-undef
       const marker = new google.maps.Marker({
         position: geolocation,
@@ -97,7 +97,7 @@ export default {
       })
 
       marker.addListener('click', () => {
-        console.log(geolocation);
+        this.$router.push({ name: 'ViewProfile', params: { id: userId } })
       })
     }
   },
