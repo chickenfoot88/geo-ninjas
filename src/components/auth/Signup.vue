@@ -23,9 +23,10 @@
 </template>
 <script>
 import slugify from 'slugify'
-import db from '@/firebase/init'
+import db from '@/firebase/init' 
 import firebase from 'firebase/app'
 import 'firebase/auth'
+import 'firebase/functions'
 
 export default {
   name: 'Signup',
@@ -49,9 +50,10 @@ export default {
 
         const usersRef = db.collection('users').doc(this.slug)
         try {
-          const doc = await usersRef.get()
+          const checkAlias = firebase.functions().httpsCallable('checkAlias')
+          const { data: { unique } } = await checkAlias({ slug: this.slug })
 
-          if (doc.exists) {
+          if (!unique) {
             this.feedback = 'This alias allready exists'
           } else {
             const { user } = await firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
